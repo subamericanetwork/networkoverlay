@@ -10,9 +10,9 @@
   "license": "ISC",
   "dependencies": {
     "dotenv": "^16.5.0",
+    "express": "^5.1.0",
     "redis": "^5.0.1",
     "ws": "^8.18.2"
   },
-  "devDependencies": {},
   "description": ""
 }
