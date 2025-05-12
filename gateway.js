@@ -7,7 +7,11 @@ const wss = new WebSocket.Server({ port: process.env.PORT || 10000 }, () => {
 });
 
 const redis = createClient({
-  url: process.env.REDIS_URL
+  url: process.env.REDIS_URL,
+  socket: {
+    tls: true,
+    rejectUnauthorized: false,
+  }
 });
 
 redis.on('connect', () => {
