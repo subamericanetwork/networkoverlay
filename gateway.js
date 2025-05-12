@@ -26,11 +26,16 @@ wss.on('connection', (ws) => {
   console.log('📡 New client connected');
 });
 
-redis.subscribe('overlay_v1', (message) => {
-  console.log('🔁 Overlay from Redis:', message);
-  wss.clients.forEach((client) => {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(message);
-    }
+// Wrap async logic in an IIFE
+(async () => {
+  await redis.connect();
+  await redis.subscribe('overlay_v1', (message) => {
+    console.log('🔁 Overlay from Redis:', message);
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
+    });
   });
-});
+  console.log('✅ Subscribed to overlay_v1');
+})();
