@@ -7,12 +7,8 @@ const wss = new WebSocket.Server({ port: process.env.PORT || 10000 }, () => {
 });
 
 const redis = createClient({
-    socket: {
-      tls: true,  // this turns on actual TLS (rediss)
-      rejectUnauthorized: false, // disables cert validation (safe for dev)
-    },
-    url: process.env.REDIS_URL
-  });
+  url: process.env.REDIS_URL
+});
 
 redis.on('connect', () => {
   console.log('✅ Connected to Redis!');
