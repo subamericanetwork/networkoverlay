@@ -1,20 +1,26 @@
 require('dotenv').config();
+const express = require('express');
+const http = require('http');
 const WebSocket = require('ws');
 const { createClient } = require('redis');
-const express = require('express');
 
 const app = express();
-const HTTP_PORT = process.env.HTTP_PORT || 3000; // Separate port for HTTP API (can be same as WS if Render allows)
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+
 let latestOverlay = { text: "Subamerica Network" }; // Default overlay
 
-const wss = new WebSocket.Server({ port: process.env.PORT || 10000 }, () => {
-  console.log('✅ WebSocket Server running');
+// HTTP endpoint for overlay
+app.get('/api/overlay', (req, res) => {
+  res.json(latestOverlay);
 });
 
-const redis = createClient({
-  url: process.env.REDIS_URL
-  // DO NOT include socket/tls here!
+// WebSocket logic
+wss.on('connection', (ws) => {
+  console.log('📡 New client connected');
 });
+
+const redis = createClient({ url: process.env.REDIS_URL });
 
 redis.on('connect', () => {
   console.log('✅ Connected to Redis!');
@@ -22,20 +28,6 @@ redis.on('connect', () => {
 
 redis.on('error', (err) => {
   console.error('❌ Redis error:', err);
-});
-
-wss.on('connection', (ws) => {
-  console.log('📡 New client connected');
-});
-
-// HTTP endpoint for Roku polling
-app.get('/api/overlay', (req, res) => {
-  res.json(latestOverlay);
-});
-
-// Start HTTP server
-app.listen(HTTP_PORT, () => {
-  console.log(`🌐 HTTP API server running on port ${HTTP_PORT}`);
 });
 
 // Wrap async logic in an IIFE
@@ -58,3 +50,8 @@ app.listen(HTTP_PORT, () => {
   });
   console.log('✅ Subscribed to overlay_v1');
 })();
+
+const PORT = process.env.PORT || 10000;
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
